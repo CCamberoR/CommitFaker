@@ -1,0 +1,206 @@
+# CommitFaker - Dependencies
+
+## Node.js Requirements
+- Node.js >= 16.0.0
+- npm >= 7.0.0
+
+## Production Dependencies
+
+### GitHub Integration
+- @octokit/rest: ^20.0.2         # GitHub API client
+- axios: ^1.6.2                  # HTTP client for additional requests
+
+### CLI & Terminal
+- chalk: ^5.3.0                  # Terminal colors and styling
+- commander: ^11.1.0             # CLI command parser
+- inquirer: ^9.2.12              # Interactive command line prompts
+
+### Git Operations
+- simple-git: ^3.20.0            # Git operations from Node.js
+
+### Configuration & Environment
+- dotenv: ^16.3.1                # Environment variables loader
+
+### Date & Time
+- moment: ^2.29.4                # Date manipulation and formatting
+
+### Web Interface
+- express: ^4.18.2               # Web server framework
+- socket.io: ^4.7.4              # Real-time communication
+- cors: ^2.8.5                   # Cross-origin resource sharing
+- multer: ^1.4.5-lts.1           # File upload handling
+
+## Development Dependencies
+- nodemon: ^3.0.2                # Development server with auto-reload
+
+## System Requirements
+
+### Operating System
+- Windows 10/11
+- macOS 10.15+
+- Linux (Ubuntu 18.04+, CentOS 7+, etc.)
+
+### Git Configuration
+- Git 2.20.0 or higher
+- Configured git user.name and user.email
+- GitHub account with personal access token
+
+### Network Requirements
+- Internet connection for GitHub API access
+- Access to api.github.com (HTTPS/443)
+- Optional: Access to github.com for repository cloning
+
+## Installation Commands
+
+```bash
+# Install Node.js dependencies
+npm install
+
+# Install specific versions (if needed)
+npm install @octokit/rest@20.0.2 express@4.18.2 socket.io@4.7.4
+
+# Global dependencies (optional)
+npm install -g nodemon          # For development
+
+# Verify installation
+node --version                  # Should be >= 16.0.0
+npm --version                   # Should be >= 7.0.0
+git --version                   # Should be >= 2.20.0
+```
+
+## Environment Configuration
+
+### Required Environment Variables
+```env
+GITHUB_TOKEN=<your_github_token>           # Required: GitHub personal access token
+GITHUB_USERNAME=<your_username>            # Required: Your GitHub username
+SYNC_EMAILS=<email1,email2>               # Required: Emails to synchronize
+```
+
+### Optional Environment Variables
+```env
+DEFAULT_SYNC_EMAIL=<default_email>         # Default email for quick sync
+DEFAULT_REPO_NAME=commit-history           # Repository name for commits
+WEB_PORT=3000                             # Web interface port
+WEB_HOST=localhost                        # Web interface host
+```
+
+## GitHub Token Permissions
+
+Your GitHub personal access token needs the following scopes:
+- ✅ `repo` - Full control of private repositories
+- ✅ `user` - Read user profile data
+- ✅ `user:email` - Access user email addresses (optional)
+
+## Docker Requirements (Optional)
+
+If running in Docker:
+```dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+EXPOSE 3000
+CMD ["npm", "run", "web"]
+```
+
+## Port Requirements
+
+### Web Interface
+- Port 3000 (default, configurable via WEB_PORT)
+- Used for the web interface and Socket.IO connections
+
+### Firewall Configuration
+If running on a server, ensure port 3000 is open:
+```bash
+# Ubuntu/Debian
+sudo ufw allow 3000
+
+# CentOS/RHEL
+sudo firewall-cmd --add-port=3000/tcp --permanent
+sudo firewall-cmd --reload
+```
+
+## Troubleshooting Dependencies
+
+### Common Issues
+
+1. **Node.js Version Error**
+   ```bash
+   # Check version
+   node --version
+   
+   # Update Node.js
+   # Visit https://nodejs.org or use nvm
+   nvm install 18
+   nvm use 18
+   ```
+
+2. **npm Permission Issues**
+   ```bash
+   # Fix npm permissions (Linux/macOS)
+   sudo chown -R $(whoami) ~/.npm
+   
+   # Or use nvm for per-user installation
+   ```
+
+3. **Git Not Found**
+   ```bash
+   # Install Git
+   # Ubuntu/Debian: sudo apt install git
+   # CentOS/RHEL: sudo yum install git
+   # macOS: xcode-select --install
+   # Windows: Download from https://git-scm.com
+   ```
+
+4. **GitHub API Rate Limits**
+   - Ensure GITHUB_TOKEN is properly configured
+   - Personal tokens have higher rate limits than anonymous requests
+   - Consider using GitHub Apps for even higher limits
+
+5. **Socket.IO Connection Issues**
+   ```bash
+   # Check if port is available
+   netstat -an | grep 3000
+   
+   # Check firewall settings
+   # Ensure port 3000 is not blocked
+   ```
+
+## Performance Considerations
+
+### Memory Requirements
+- Minimum: 512MB RAM
+- Recommended: 1GB+ RAM for large repositories
+
+### Disk Space
+- Minimum: 100MB for application
+- Additional space needed for cloned repositories and commit history
+
+### Network Bandwidth
+- GitHub API requests: ~1KB per request
+- Repository cloning: Varies by repository size
+- Web interface: ~100KB initial load
+
+## Security Considerations
+
+### Token Security
+- Never commit .env files to version control
+- Use environment-specific .env files
+- Rotate tokens regularly
+- Consider using GitHub Apps for production
+
+### Network Security
+- Use HTTPS for all GitHub API communications
+- Consider running behind reverse proxy in production
+- Enable CORS appropriately for web interface
+
+### File Permissions
+```bash
+# Secure .env file
+chmod 600 .env
+
+# Secure script files
+chmod 755 scripts/*.js
+```

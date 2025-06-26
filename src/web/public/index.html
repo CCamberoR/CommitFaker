@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CommitFaker - Web Interface</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-code-branch"></i> CommitFaker</h1>
+            <p>Herramienta para actualizar tu gráfico de contribuciones de GitHub</p>
+            <div id="status-indicator" class="status-indicator">
+                <i class="fas fa-circle"></i>
+                <span id="status-text">Verificando configuración...</span>
+            </div>
+        </header>
+
+        <div id="config-warning" class="config-warning" style="display: none;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div>
+                <h3>Configuración incompleta</h3>
+                <p>Por favor completa la configuración en el archivo <code>.env</code>:</p>
+                <ul id="config-errors"></ul>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-button active" data-tab="fake-commits">
+                <i class="fas fa-chart-line"></i> Commits Falsos
+            </button>
+            <button class="tab-button" data-tab="email-sync">
+                <i class="fas fa-envelope"></i> Sincronizar Email
+            </button>
+            <button class="tab-button" data-tab="single-repo">
+                <i class="fas fa-repository"></i> Repositorio Específico
+            </button>
+            <button class="tab-button" data-tab="patterns">
+                <i class="fas fa-paint-brush"></i> Patrones
+            </button>
+            <button class="tab-button" data-tab="stats">
+                <i class="fas fa-chart-pie"></i> Estadísticas
+            </button>
+        </div>
+
+        <div class="tab-content">
+            <!-- Fake Commits Tab -->
+            <div id="fake-commits" class="tab-panel active">
+                <h2><i class="fas fa-chart-line"></i> Crear Commits Falsos</h2>
+                <form id="fake-commits-form">
+                    <div class="form-group">
+                        <label for="start-date">Fecha de inicio:</label>
+                        <input type="date" id="start-date" value="2024-01-01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="end-date">Fecha de fin:</label>
+                        <input type="date" id="end-date" value="2024-12-31" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="pattern">Patrón:</label>
+                        <select id="pattern">
+                            <option value="random">🎲 Aleatorio</option>
+                            <option value="wave">🌊 Onda</option>
+                            <option value="streak">🔥 Rachas</option>
+                            <option value="custom">🎯 Personalizado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="intensity">Intensidad:</label>
+                        <select id="intensity">
+                            <option value="low">🟢 Baja (1-3 commits/día)</option>
+                            <option value="medium" selected>🟡 Media (3-7 commits/día)</option>
+                            <option value="high">🔴 Alta (7-15 commits/día)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-play"></i> Crear Commits
+                    </button>
+                </form>
+            </div>
+
+            <!-- Email Sync Tab -->
+            <div id="email-sync" class="tab-panel">
+                <h2><i class="fas fa-envelope"></i> Sincronizar por Email</h2>
+                <div class="email-sync-options">
+                    <div class="option-card">
+                        <h3><i class="fas fa-envelope-open"></i> Sincronizar Email Específico</h3>
+                        <form id="email-sync-form">
+                            <div class="form-group">
+                                <label for="sync-email">Email:</label>
+                                <select id="sync-email">
+                                    <!-- Options populated by JS -->
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="auto-confirm" checked>
+                                    Confirmar automáticamente
+                                </label>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-sync"></i> Sincronizar Email
+                            </button>
+                        </form>
+                    </div>
+                    <div class="option-card">
+                        <h3><i class="fas fa-envelope-bulk"></i> Sincronizar Todos los Emails</h3>
+                        <p>Sincroniza commits de todos los emails configurados en <code>.env</code></p>
+                        <button id="sync-all-emails" class="btn btn-secondary">
+                            <i class="fas fa-sync-alt"></i> Sincronizar Todos
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Single Repo Tab -->
+            <div id="single-repo" class="tab-panel">
+                <h2><i class="fas fa-repository"></i> Sincronizar Repositorio Específico</h2>
+                <form id="single-repo-form">
+                    <div class="form-group">
+                        <label for="repo-url">URL del Repositorio:</label>
+                        <input type="url" id="repo-url" placeholder="https://github.com/usuario/repositorio" required>
+                        <small>Introduce la URL completa del repositorio de GitHub</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="repo-email">Email a buscar:</label>
+                        <select id="repo-email">
+                            <!-- Options populated by JS -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="repo-auto-confirm" checked>
+                            Confirmar automáticamente
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-download"></i> Sincronizar Repositorio
+                    </button>
+                </form>
+            </div>
+
+            <!-- Patterns Tab -->
+            <div id="patterns" class="tab-panel">
+                <h2><i class="fas fa-paint-brush"></i> Generar Patrones</h2>
+                <div class="patterns-grid">
+                    <div class="pattern-card" data-pattern="growth">
+                        <h3><i class="fas fa-chart-line"></i> Crecimiento Gradual</h3>
+                        <p>Patrón de commits que aumenta progresivamente a lo largo del año</p>
+                        <button class="btn btn-outline">Generar</button>
+                    </div>
+                    <div class="pattern-card" data-pattern="wave">
+                        <h3><i class="fas fa-water"></i> Onda Sinusoidal</h3>
+                        <p>Patrón ondulado con picos y valles regulares</p>
+                        <button class="btn btn-outline">Generar</button>
+                    </div>
+                    <div class="pattern-card" data-pattern="spikes">
+                        <h3><i class="fas fa-mountain"></i> Picos Aleatorios</h3>
+                        <p>Actividad baja con picos intensos aleatorios</p>
+                        <button class="btn btn-outline">Generar</button>
+                    </div>
+                    <div class="pattern-card" data-pattern="cycle">
+                        <h3><i class="fas fa-calendar-week"></i> Patrón Cíclico</h3>
+                        <p>Patrón semanal que simula horario laboral</p>
+                        <button class="btn btn-outline">Generar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Tab -->
+            <div id="stats" class="tab-panel">
+                <h2><i class="fas fa-chart-pie"></i> Estadísticas</h2>
+                <div class="stats-actions">
+                    <button id="load-stats" class="btn btn-primary">
+                        <i class="fas fa-refresh"></i> Cargar Estadísticas
+                    </button>
+                    <button id="sync-forks" class="btn btn-secondary">
+                        <i class="fas fa-code-branch"></i> Sincronizar Forks
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="logs-section">
+            <h3><i class="fas fa-terminal"></i> Logs en Tiempo Real</h3>
+            <div id="logs" class="logs-container"></div>
+            <button id="clear-logs" class="btn btn-outline btn-small">
+                <i class="fas fa-trash"></i> Limpiar Logs
+            </button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
